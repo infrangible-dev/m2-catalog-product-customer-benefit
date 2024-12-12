@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+
+<!--
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2024 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="sales_order_invoice_save_after">
+        <observer name="infrangible_catalogproductcustomerbenefit" instance="Infrangible\CatalogProductCustomerBenefit\Observer\SalesOrderInvoiceSaveAfter"/>
+    </event>
+    <event name="customer_benefit_delete_commit_after">
+        <observer name="infrangible_catalogproductcustomerbenefit" instance="Infrangible\CatalogProductCustomerBenefit\Observer\CustomerBenefitDeleteCommitAfter"/>
+    </event>
+    <event name="customer_benefit_save_commit_after">
+        <observer name="infrangible_catalogproductcustomerbenefit" instance="Infrangible\CatalogProductCustomerBenefit\Observer\CustomerBenefitSaveCommitAfter"/>
+    </event>
+</config>
