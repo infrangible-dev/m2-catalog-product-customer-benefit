@@ -27,6 +27,8 @@ use Magento\Framework\Model\AbstractModel;
  * @method void setDaysAfterCreatedAt($daysAfterCreatedAt)
  * @method int getPriority()
  * @method void setPriority(int $priority)
+ * @method int getWebsiteId()
+ * @method void setWebsiteId(int $websiteId)
  * @method int getActive()
  * @method void setActive(int $active)
  */

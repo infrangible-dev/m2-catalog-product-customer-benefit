@@ -12,6 +12,7 @@ use Infrangible\CatalogProductPriceCalculation\Model\Calculation\Prices\SimpleFa
 use Infrangible\CatalogProductPriceCalculation\Model\Calculation\PricesInterface;
 use Infrangible\CatalogProductPriceCalculation\Model\CalculationDataInterface;
 use Infrangible\Core\Helper\Customer;
+use Infrangible\Core\Helper\Stores;
 use Magento\Catalog\Model\Product;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\Exception\LocalizedException;
@@ -41,6 +42,9 @@ class CustomerBenefit extends Base implements CalculationDataInterface
     /** @var Customer */
     protected $customerHelper;
 
+    /** @var Stores */
+    protected $storeHelper;
+
     /** @var int */
     private $sourceProductId;
 
@@ -62,6 +66,9 @@ class CustomerBenefit extends Base implements CalculationDataInterface
     /** @var int */
     private $priority;
 
+    /** @var int */
+    private $websiteId;
+
     public function __construct(
         SimpleFactory $pricesFactory,
         AmountFactory $amountFactory,
@@ -69,7 +76,8 @@ class CustomerBenefit extends Base implements CalculationDataInterface
         Data $helper,
         Variables $variables,
         Json $json,
-        Customer $customerHelper
+        Customer $customerHelper,
+        Stores $storeHelper
     ) {
         parent::__construct(
             $pricesFactory,
@@ -81,6 +89,7 @@ class CustomerBenefit extends Base implements CalculationDataInterface
         $this->variables = $variables;
         $this->json = $json;
         $this->customerHelper = $customerHelper;
+        $this->storeHelper = $storeHelper;
     }
 
     public function getCode(): string
@@ -93,7 +102,8 @@ class CustomerBenefit extends Base implements CalculationDataInterface
                         'source_product_id' => $this->getSourceProductId(),
                         'target_product_id' => $this->getTargetProductId(),
                         'price'             => $this->getPrice(),
-                        'discount'          => $this->getDiscount()
+                        'discount'          => $this->getDiscount(),
+                        'website_id'        => $this->getWebsiteId()
                     ]
                 )
             )
@@ -175,6 +185,16 @@ class CustomerBenefit extends Base implements CalculationDataInterface
         $this->priority = $priority;
     }
 
+    public function getWebsiteId(): int
+    {
+        return $this->websiteId;
+    }
+
+    public function setWebsiteId(int $websiteId): void
+    {
+        $this->websiteId = $websiteId;
+    }
+
     public function hasProductCalculation(Product $product): bool
     {
         return $product->getId() == $this->getTargetProductId();
@@ -204,6 +224,15 @@ class CustomerBenefit extends Base implements CalculationDataInterface
 
         if (! $customerId) {
             return false;
+        }
+
+        if ($this->getWebsiteId() != 0) {
+            $website = $this->storeHelper->getWebsite();
+            $websiteId = $website->getId();
+
+            if ($websiteId != $this->getWebsiteId()) {
+                return false;
+            }
         }
 
         $currentTimestamp = (new \DateTime())->getTimestamp();

@@ -9,6 +9,7 @@ use Infrangible\CatalogProductCustomerBenefit\Model\CustomerBenefit;
 use Infrangible\CatalogProductCustomerBenefit\Model\ResourceModel\CustomerBenefit\CollectionFactory;
 use Infrangible\CatalogProductCustomerPrice\Helper\Cache;
 use Infrangible\Core\Helper\Customer;
+use Infrangible\Core\Helper\Stores;
 
 /**
  * @author      Andreas Knollmann
@@ -29,16 +30,21 @@ class Data
     /** @var Cache */
     protected $cacheHelper;
 
+    /** @var Stores */
+    protected $storeHelper;
+
     public function __construct(
         CollectionFactory $collectionFactory,
         Customer $customerHelper,
         Variables $variables,
-        Cache $cacheHelper
+        Cache $cacheHelper,
+        Stores $storeHelper
     ) {
         $this->collectionFactory = $collectionFactory;
         $this->customerHelper = $customerHelper;
         $this->variables = $variables;
         $this->cacheHelper = $cacheHelper;
+        $this->storeHelper = $storeHelper;
     }
 
     /**
@@ -49,6 +55,9 @@ class Data
         array $sourceProductOptionValueIds,
         int $customerId
     ): array {
+        $website = $this->storeHelper->getWebsite();
+        $websiteId = $website->getId();
+
         $currentTimestamp = (new \DateTime())->getTimestamp();
 
         $customer = $this->customerHelper->loadCustomer($this->variables->intValue($customerId));
@@ -58,6 +67,7 @@ class Data
         $collection->addSourceProductFilter($this->variables->intValue($sourceProductId));
         $collection->addActiveFilter();
         $collection->addPriorityOrder();
+        $collection->addWebsiteFilter($this->variables->intValue($websiteId));
 
         /** @var CustomerBenefit $customerBenefit */
         foreach ($collection as $customerBenefit) {
@@ -108,7 +118,7 @@ class Data
             'customer_benefit',
             'catalog_product_customer_benefit',
             'target_product_id',
-            ['price', 'discount', 'priority']
+            ['price', 'discount', 'priority', 'website_id']
         );
     }
 }

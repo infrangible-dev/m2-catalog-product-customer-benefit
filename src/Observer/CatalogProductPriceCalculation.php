@@ -76,6 +76,9 @@ class CatalogProductPriceCalculation implements ObserverInterface
                 );
             }
             $customerBenefitCalculation->setPriority($this->variables->intValue($customerBenefit->getPriority()));
+            $customerBenefitCalculation->setWebsiteId(
+                $this->variables->intValue($customerBenefit->getWebsiteId())
+            );
 
             $calculations->addCalculation($customerBenefitCalculation);
         }

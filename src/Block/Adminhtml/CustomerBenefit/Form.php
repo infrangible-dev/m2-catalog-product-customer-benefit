@@ -79,6 +79,8 @@ class Form extends \Infrangible\BackendWidget\Block\Form
             __('Priority')->render()
         );
 
+        $this->addWebsiteSelectField($fieldSet, 'website_id');
+
         $this->addYesNoWithDefaultField(
             $fieldSet,
             'active',
