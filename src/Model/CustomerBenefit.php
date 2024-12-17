@@ -85,6 +85,42 @@ class CustomerBenefit extends AbstractModel
     /**
      * @throws \Exception
      */
+    public function getCustomerCreatedAtLimitDate(): ?\DateTime
+    {
+        $createdAtDaysBefore = $this->getCreatedAtDaysBefore();
+
+        if (! $createdAtDaysBefore) {
+            return null;
+        }
+
+        $customerId = $this->customerSession->getCustomerId();
+
+        if (! $customerId) {
+            return null;
+        }
+
+        $customerId = $this->variables->intValue($customerId);
+
+        $customer = $this->customerHelper->loadCustomer($customerId);
+
+        $createdAtTimestamp = $customer->getCreatedAtTimestamp();
+        $customerDate = new \DateTime();
+        $customerDate->setTimestamp($createdAtTimestamp);
+        $customerDate->add(
+            new \DateInterval(
+                sprintf(
+                    'P%dD',
+                    $createdAtDaysBefore
+                )
+            )
+        );
+
+        return $customerDate;
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function checkCreatedAtDaysBefore(): bool
     {
         $createdAtDaysBefore = $this->getCreatedAtDaysBefore();
@@ -93,20 +129,12 @@ class CustomerBenefit extends AbstractModel
             return true;
         }
 
-        $customerId = $this->customerSession->getCustomerId();
+        $customerCreatedAtLimitDate = $this->getCustomerCreatedAtLimitDate();
 
-        if (! $customerId) {
+        if ($customerCreatedAtLimitDate === null) {
             return false;
         }
 
-        $customerId = $this->variables->intValue($customerId);
-
-        $customer = $this->customerHelper->loadCustomer($customerId);
-        $customerCreatedAtTimestamp = $customer->getCreatedAtTimestamp();
-
-        $checkTimestamp = $customerCreatedAtTimestamp + $createdAtDaysBefore * 24 * 60 * 60;
-        $currentTimestamp = (new \DateTime())->getTimestamp();
-
-        return $currentTimestamp < $checkTimestamp;
+        return (new \DateTime())->getTimestamp() <= $customerCreatedAtLimitDate->getTimestamp();
     }
 }
