@@ -56,6 +56,11 @@ class CatalogProductPriceCalculation implements ObserverInterface
             $customerBenefitCalculation->setSourceProductId(
                 $this->variables->intValue($customerBenefit->getSourceProductId())
             );
+            if ($customerBenefit->getSourceProductOptionId()) {
+                $customerBenefitCalculation->setSourceProductOptionId(
+                    $this->variables->intValue($customerBenefit->getSourceProductOptionId())
+                );
+            }
             if ($customerBenefit->getSourceProductOptionValueId()) {
                 $customerBenefitCalculation->setSourceProductOptionValueId(
                     $this->variables->intValue($customerBenefit->getSourceProductOptionValueId())
@@ -70,9 +75,9 @@ class CatalogProductPriceCalculation implements ObserverInterface
             if ($customerBenefit->getDiscount()) {
                 $customerBenefitCalculation->setDiscount($this->variables->intValue($customerBenefit->getDiscount()));
             }
-            if ($customerBenefit->getDaysAfterCreatedAt()) {
-                $customerBenefitCalculation->setDaysAfterCreatedAt(
-                    $this->variables->intValue($customerBenefit->getDaysAfterCreatedAt())
+            if ($customerBenefit->getCreatedAtDaysBefore()) {
+                $customerBenefitCalculation->setCreatedAtDaysBefore(
+                    $this->variables->intValue($customerBenefit->getCreatedAtDaysBefore())
                 );
             }
             $customerBenefitCalculation->setPriority($this->variables->intValue($customerBenefit->getPriority()));

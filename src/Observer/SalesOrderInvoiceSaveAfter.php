@@ -8,6 +8,7 @@ use FeWeDev\Base\Arrays;
 use FeWeDev\Base\Variables;
 use Infrangible\CatalogProductCustomerBenefit\Helper\Data;
 use Infrangible\CatalogProductCustomerPrice\Model\ProductCustomerPriceFactory;
+use Magento\Catalog\Model\Product\Option;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Exception\AlreadyExistsException;
@@ -80,8 +81,11 @@ class SalesOrderInvoiceSaveAfter implements ObserverInterface
 
             /** @var Item $item */
             foreach ($items as $item) {
-                $sourceProductId = $item->getProductId();
+                $sourceProduct = $item->getProduct();
 
+                $sourceProductId = $sourceProduct->getId();
+
+                $sourceProductOptionIds = [];
                 $sourceProductOptionValueIds = [];
 
                 $sourceProductOptions = $item->getProductOptions();
@@ -91,18 +95,35 @@ class SalesOrderInvoiceSaveAfter implements ObserverInterface
                     'options',
                     []
                 ) as $productOption) {
-                    $sourceProductOptionValueId = $this->arrays->getValue(
+                    $sourceProductOptionId = $this->arrays->getValue(
                         $productOption,
-                        'option_value'
+                        'option_id'
                     );
 
-                    if ($sourceProductOptionValueId) {
-                        $sourceProductOptionValueIds[] = $sourceProductOptionValueId;
+                    /** @var Option $sourceProductOption */
+                    foreach ($sourceProduct->getProductOptionsCollection() as $sourceProductOption) {
+                        if ($sourceProductOption->getId() == $sourceProductOptionId) {
+                            $sourceProductOptionValues = $sourceProductOption->getValues();
+
+                            if ($sourceProductOptionValues === null) {
+                                $sourceProductOptionIds[] = $sourceProductOptionId;
+                            } else {
+                                $sourceProductOptionValueId = $this->arrays->getValue(
+                                    $productOption,
+                                    'option_value'
+                                );
+
+                                if ($sourceProductOptionValueId) {
+                                    $sourceProductOptionValueIds[] = $sourceProductOptionValueId;
+                                }
+                            }
+                        }
                     }
                 }
 
                 $targetProductPriceData = $this->helper->getTargetProductPriceData(
                     $this->variables->intValue($sourceProductId),
+                    $sourceProductOptionIds,
                     $sourceProductOptionValueIds,
                     $this->variables->intValue($customerId)
                 );

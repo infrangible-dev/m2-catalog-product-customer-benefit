@@ -28,8 +28,13 @@ class Grid extends \Infrangible\BackendWidget\Block\Grid
         );
 
         $this->addProductOptionColumn(
-            'source_product_option_value_id',
+            'source_product_option_id',
             __('Source Product Option')->render()
+        );
+
+        $this->addProductOptionValueColumn(
+            'source_product_option_value_id',
+            __('Source Product Option Value')->render()
         );
 
         $this->addProductNameColumn(
@@ -53,7 +58,7 @@ class Grid extends \Infrangible\BackendWidget\Block\Grid
         );
 
         $this->addNumberColumn(
-            'days_after_created_at',
+            'created_at_days_before',
             __('Days After Created At')->render()
         );
 

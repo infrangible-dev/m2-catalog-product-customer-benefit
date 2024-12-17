@@ -49,6 +49,9 @@ class CustomerBenefit extends Base implements CalculationDataInterface
     private $sourceProductId;
 
     /** @var int|null */
+    private $sourceProductOptionId;
+
+    /** @var int|null */
     private $sourceProductOptionValueId;
 
     /** @var int */
@@ -61,7 +64,7 @@ class CustomerBenefit extends Base implements CalculationDataInterface
     private $discount;
 
     /** @var int|null */
-    private $daysAfterCreatedAt;
+    private $createdAtDaysBefore;
 
     /** @var int */
     private $priority;
@@ -120,6 +123,16 @@ class CustomerBenefit extends Base implements CalculationDataInterface
         $this->sourceProductId = $sourceProductId;
     }
 
+    public function getSourceProductOptionId(): ?int
+    {
+        return $this->sourceProductOptionId;
+    }
+
+    public function setSourceProductOptionId(?int $sourceProductOptionId): void
+    {
+        $this->sourceProductOptionId = $sourceProductOptionId;
+    }
+
     public function getSourceProductOptionValueId(): ?int
     {
         return $this->sourceProductOptionValueId;
@@ -160,14 +173,14 @@ class CustomerBenefit extends Base implements CalculationDataInterface
         $this->discount = $discount;
     }
 
-    public function getDaysAfterCreatedAt(): ?int
+    public function getCreatedAtDaysBefore(): ?int
     {
-        return $this->daysAfterCreatedAt;
+        return $this->createdAtDaysBefore;
     }
 
-    public function setDaysAfterCreatedAt(?int $daysAfterCreatedAt): void
+    public function setCreatedAtDaysBefore(?int $createdAtDaysBefore): void
     {
-        $this->daysAfterCreatedAt = $daysAfterCreatedAt;
+        $this->createdAtDaysBefore = $createdAtDaysBefore;
     }
 
     public function getQuoteItemOptionCode(): string
@@ -254,6 +267,24 @@ class CustomerBenefit extends Base implements CalculationDataInterface
                 continue;
             }
 
+            $sourceProductOptionId = $this->getSourceProductOptionId();
+
+            if ($sourceProductOptionId) {
+                $optionIdsOption = $item->getOptionByCode('option_ids');
+
+                $optionIds = $optionIdsOption ? explode(
+                    ',',
+                    $optionIdsOption->getValue()
+                ) : [];
+
+                if (! in_array(
+                    $sourceProductOptionId,
+                    $optionIds
+                )) {
+                    continue;
+                }
+            }
+
             $sourceProductOptionValueId = $this->getSourceProductOptionValueId();
 
             if ($sourceProductOptionValueId) {
@@ -300,7 +331,7 @@ class CustomerBenefit extends Base implements CalculationDataInterface
                 }
             }
 
-            $daysAfterCreatedAt = $this->getDaysAfterCreatedAt();
+            $daysAfterCreatedAt = $this->getCreatedAtDaysBefore();
 
             if ($daysAfterCreatedAt) {
                 $checkTimestamp = $customerCreatedAtTimestamp + $daysAfterCreatedAt * 24 * 60 * 60;

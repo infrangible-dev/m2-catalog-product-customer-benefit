@@ -25,11 +25,18 @@ class Form extends \Infrangible\BackendWidget\Block\Form
             $fieldSet,
             'source_product_id',
             __('Source Product')->render(),
-            ['source_product_option_value_id'],
+            ['source_product_option_id', 'source_product_option_value_id'],
             true
         );
 
         $this->addProductOptionField(
+            $fieldSet,
+            'source_product_id',
+            'source_product_option_id',
+            __('Source Product Option')->render()
+        );
+
+        $this->addProductOptionValueField(
             $fieldSet,
             'source_product_id',
             'source_product_option_value_id',
@@ -63,7 +70,7 @@ class Form extends \Infrangible\BackendWidget\Block\Form
 
         $this->addIntegerField(
             $fieldSet,
-            'days_after_created_at',
+            'created_at_days_before',
             __('Days After Created At')->render()
         );
 

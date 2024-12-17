@@ -33,18 +33,23 @@ class Data
     /** @var Stores */
     protected $storeHelper;
 
+    /** @var CollectionFactory */
+    protected $customerBenefitCollectionFactory;
+
     public function __construct(
         CollectionFactory $collectionFactory,
         Customer $customerHelper,
         Variables $variables,
         Cache $cacheHelper,
-        Stores $storeHelper
+        Stores $storeHelper,
+        CollectionFactory $customerBenefitCollectionFactory
     ) {
         $this->collectionFactory = $collectionFactory;
         $this->customerHelper = $customerHelper;
         $this->variables = $variables;
         $this->cacheHelper = $cacheHelper;
         $this->storeHelper = $storeHelper;
+        $this->customerBenefitCollectionFactory = $customerBenefitCollectionFactory;
     }
 
     /**
@@ -52,6 +57,7 @@ class Data
      */
     public function getTargetProductPriceData(
         int $sourceProductId,
+        array $sourceProductOptionIds,
         array $sourceProductOptionValueIds,
         int $customerId
     ): array {
@@ -71,6 +77,22 @@ class Data
 
         /** @var CustomerBenefit $customerBenefit */
         foreach ($collection as $customerBenefit) {
+            $sourceProductOptionId = $customerBenefit->getSourceProductOptionId();
+
+            if ($sourceProductOptionId) {
+                $hasProductOption = false;
+
+                foreach ($sourceProductOptionIds as $optionId) {
+                    if ($optionId == $sourceProductOptionId) {
+                        $hasProductOption = true;
+                    }
+                }
+
+                if (! $hasProductOption) {
+                    continue;
+                }
+            }
+
             $sourceProductOptionValueId = $customerBenefit->getSourceProductOptionValueId();
 
             if ($sourceProductOptionValueId) {
@@ -87,7 +109,7 @@ class Data
                 }
             }
 
-            $daysAfterCreatedAt = $customerBenefit->getDaysAfterCreatedAt();
+            $daysAfterCreatedAt = $customerBenefit->getCreatedAtDaysBefore();
 
             if ($daysAfterCreatedAt) {
                 $checkTimestamp = $customerCreatedAtTimestamp + $daysAfterCreatedAt * 24 * 60 * 60;
@@ -120,5 +142,37 @@ class Data
             'target_product_id',
             ['price', 'discount', 'priority', 'website_id']
         );
+    }
+
+    /**
+     * @return CustomerBenefit[]
+     *
+     * @throws \Exception
+     */
+    public function getSourceProductOptionCustomerBenefits(
+        int $sourceProductId,
+        int $sourceProductOptionId,
+        bool $checkCustomerDaysAfterCreatedAt
+    ): array {
+        $customerBenefitCollection = $this->customerBenefitCollectionFactory->create();
+
+        $customerBenefitCollection->addSourceProductFilter($sourceProductId);
+        $customerBenefitCollection->addSourceProductOptionFilter($sourceProductOptionId);
+        $customerBenefitCollection->addWebsiteFilter(
+            $this->variables->intValue($this->storeHelper->getWebsite()->getId())
+        );
+        $customerBenefitCollection->addActiveFilter();
+        $customerBenefitCollection->addPriorityOrder();
+
+        $customerBenefits = [];
+
+        /** @var CustomerBenefit $customerBenefit */
+        foreach ($customerBenefitCollection as $customerBenefit) {
+            if (! $checkCustomerDaysAfterCreatedAt || $customerBenefit->checkCustomerDaysAfterCreatedAt()) {
+                $customerBenefits[] = $customerBenefit;
+            }
+        }
+
+        return $customerBenefits;
     }
 }

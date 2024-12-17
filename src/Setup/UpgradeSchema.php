@@ -64,6 +64,32 @@ class UpgradeSchema implements UpgradeSchemaInterface
             }
         }
 
+        if (version_compare(
+            $context->getVersion(),
+            '1.2.0',
+            '<'
+        )) {
+            $connection = $setup->getConnection();
+
+            if (! $connection->tableColumnExists(
+                $customerBenefitTableName,
+                'source_product_option_id'
+            )) {
+                $connection->addColumn(
+                    $customerBenefitTableName,
+                    'source_product_option_id',
+                    [
+                        'type'     => Table::TYPE_INTEGER,
+                        'length'   => 10,
+                        'nullable' => true,
+                        'unsigned' => true,
+                        'comment'  => 'Source_product_option_id',
+                        'after'    => 'source_product_id'
+                    ]
+                );
+            }
+        }
+
         $setup->endSetup();
     }
 }

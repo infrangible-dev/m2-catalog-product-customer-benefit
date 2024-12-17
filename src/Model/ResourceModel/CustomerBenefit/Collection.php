@@ -30,6 +30,14 @@ class Collection extends AbstractCollection
         );
     }
 
+    public function addSourceProductOptionFilter(int $optionId)
+    {
+        $this->addFieldToFilter(
+            'source_product_option_id',
+            $optionId
+        );
+    }
+
     public function addActiveFilter()
     {
         $this->getSelect()->where(
