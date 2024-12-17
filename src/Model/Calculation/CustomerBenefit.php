@@ -331,10 +331,10 @@ class CustomerBenefit extends Base implements CalculationDataInterface
                 }
             }
 
-            $daysAfterCreatedAt = $this->getCreatedAtDaysBefore();
+            $createdAtDaysBefore = $this->getCreatedAtDaysBefore();
 
-            if ($daysAfterCreatedAt) {
-                $checkTimestamp = $customerCreatedAtTimestamp + $daysAfterCreatedAt * 24 * 60 * 60;
+            if ($createdAtDaysBefore) {
+                $checkTimestamp = $customerCreatedAtTimestamp + $createdAtDaysBefore * 24 * 60 * 60;
 
                 if ($currentTimestamp > $checkTimestamp) {
                     continue;

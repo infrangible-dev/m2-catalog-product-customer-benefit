@@ -109,10 +109,10 @@ class Data
                 }
             }
 
-            $daysAfterCreatedAt = $customerBenefit->getCreatedAtDaysBefore();
+            $createdAtDaysBefore = $customerBenefit->getCreatedAtDaysBefore();
 
-            if ($daysAfterCreatedAt) {
-                $checkTimestamp = $customerCreatedAtTimestamp + $daysAfterCreatedAt * 24 * 60 * 60;
+            if ($createdAtDaysBefore) {
+                $checkTimestamp = $customerCreatedAtTimestamp + $createdAtDaysBefore * 24 * 60 * 60;
 
                 if ($currentTimestamp > $checkTimestamp) {
                     continue;
@@ -152,7 +152,7 @@ class Data
     public function getSourceProductOptionCustomerBenefits(
         int $sourceProductId,
         int $sourceProductOptionId,
-        bool $checkCustomerDaysAfterCreatedAt
+        bool $checkCustomerCreatedAtDaysBefore
     ): array {
         $customerBenefitCollection = $this->customerBenefitCollectionFactory->create();
 
@@ -168,7 +168,7 @@ class Data
 
         /** @var CustomerBenefit $customerBenefit */
         foreach ($customerBenefitCollection as $customerBenefit) {
-            if (! $checkCustomerDaysAfterCreatedAt || $customerBenefit->checkCustomerDaysAfterCreatedAt()) {
+            if (! $checkCustomerCreatedAtDaysBefore || $customerBenefit->checkCreatedAtDaysBefore()) {
                 $customerBenefits[] = $customerBenefit;
             }
         }

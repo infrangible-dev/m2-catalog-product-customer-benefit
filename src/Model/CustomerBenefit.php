@@ -85,11 +85,11 @@ class CustomerBenefit extends AbstractModel
     /**
      * @throws \Exception
      */
-    public function checkCustomerDaysAfterCreatedAt(): bool
+    public function checkCreatedAtDaysBefore(): bool
     {
-        $daysAfterCreatedAt = $this->getCreatedAtDaysBefore();
+        $createdAtDaysBefore = $this->getCreatedAtDaysBefore();
 
-        if (! $daysAfterCreatedAt) {
+        if (! $createdAtDaysBefore) {
             return true;
         }
 
@@ -104,7 +104,7 @@ class CustomerBenefit extends AbstractModel
         $customer = $this->customerHelper->loadCustomer($customerId);
         $customerCreatedAtTimestamp = $customer->getCreatedAtTimestamp();
 
-        $checkTimestamp = $customerCreatedAtTimestamp + $daysAfterCreatedAt * 24 * 60 * 60;
+        $checkTimestamp = $customerCreatedAtTimestamp + $createdAtDaysBefore * 24 * 60 * 60;
         $currentTimestamp = (new \DateTime())->getTimestamp();
 
         return $currentTimestamp > $checkTimestamp;

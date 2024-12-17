@@ -66,8 +66,8 @@ class CustomerBenefit extends AbstractDb
             $object->setData('limit');
         }
 
-        if ($object->getData('days_after_created_at') == 0 || $object->getData('days_after_created_at') == '') {
-            $object->setData('days_after_created_at');
+        if ($object->getData('created_at_days_before') == 0 || $object->getData('created_at_days_before') == '') {
+            $object->setData('created_at_days_before');
         }
 
         if ($object->getData('api_flag') == '') {
