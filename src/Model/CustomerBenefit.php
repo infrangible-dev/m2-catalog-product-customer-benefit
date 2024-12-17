@@ -107,6 +107,6 @@ class CustomerBenefit extends AbstractModel
         $checkTimestamp = $customerCreatedAtTimestamp + $createdAtDaysBefore * 24 * 60 * 60;
         $currentTimestamp = (new \DateTime())->getTimestamp();
 
-        return $currentTimestamp > $checkTimestamp;
+        return $currentTimestamp < $checkTimestamp;
     }
 }
