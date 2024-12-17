@@ -10,13 +10,15 @@ use Infrangible\CatalogProductCustomerBenefit\Model\ResourceModel\CustomerBenefi
 use Infrangible\CatalogProductCustomerPrice\Helper\Cache;
 use Infrangible\Core\Helper\Customer;
 use Infrangible\Core\Helper\Stores;
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
 
 /**
  * @author      Andreas Knollmann
  * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
  */
-class Data
+class Data extends AbstractHelper
 {
     /** @var Variables */
     protected $variables;
@@ -37,6 +39,7 @@ class Data
     protected $customerBenefitCollectionFactory;
 
     public function __construct(
+        Context $context,
         CollectionFactory $collectionFactory,
         Customer $customerHelper,
         Variables $variables,
@@ -44,6 +47,8 @@ class Data
         Stores $storeHelper,
         CollectionFactory $customerBenefitCollectionFactory
     ) {
+        parent::__construct($context);
+
         $this->collectionFactory = $collectionFactory;
         $this->customerHelper = $customerHelper;
         $this->variables = $variables;
