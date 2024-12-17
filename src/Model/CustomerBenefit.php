@@ -6,6 +6,8 @@ namespace Infrangible\CatalogProductCustomerBenefit\Model;
 
 use FeWeDev\Base\Variables;
 use Infrangible\Core\Helper\Customer;
+use Infrangible\Core\Helper\Product;
+use Infrangible\Core\Helper\Stores;
 use Magento\Customer\Model\Session;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Model\AbstractModel;
@@ -54,12 +56,20 @@ class CustomerBenefit extends AbstractModel
     /** @var Variables */
     protected $variables;
 
+    /** @var Stores */
+    protected $storeHelper;
+
+    /** @var Product */
+    protected $productHelper;
+
     public function __construct(
         Context $context,
         Registry $registry,
         Session $customerSession,
         Customer $customerHelper,
         Variables $variables,
+        Stores $storeHelper,
+        Product $productHelper,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = []
@@ -75,6 +85,8 @@ class CustomerBenefit extends AbstractModel
         $this->customerSession = $customerSession;
         $this->customerHelper = $customerHelper;
         $this->variables = $variables;
+        $this->storeHelper = $storeHelper;
+        $this->productHelper = $productHelper;
     }
 
     protected function _construct(): void
@@ -136,5 +148,35 @@ class CustomerBenefit extends AbstractModel
         }
 
         return (new \DateTime())->getTimestamp() <= $customerCreatedAtLimitDate->getTimestamp();
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function getTargetProductPrice(): float
+    {
+        $customerBenefitPrice = $this->getPrice();
+
+        if ($customerBenefitPrice) {
+            if (! is_float($customerBenefitPrice)) {
+                $customerBenefitPrice = floatval($customerBenefitPrice);
+            }
+
+            return $customerBenefitPrice;
+        } else {
+            $customerBenefitDiscount = $this->getDiscount();
+
+            $targetProduct = $this->productHelper->loadProduct(
+                $this->variables->intValue($this->getTargetProductId()),
+                $this->variables->intValue($this->storeHelper->getStore()->getId())
+            );
+
+            $targetProductFinalPrice = $targetProduct->getFinalPrice();
+
+            return round(
+                $targetProductFinalPrice * ((100 - $customerBenefitDiscount) / 100),
+                2
+            );
+        }
     }
 }
