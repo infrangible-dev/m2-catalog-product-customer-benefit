@@ -21,11 +21,12 @@ class Form extends \Infrangible\BackendWidget\Block\Form
             ['legend' => __('General')]
         );
 
-        $this->addProductNameFieldWithProductOptions(
+        $this->addProductNameFieldWithProductOptionsAndValues(
             $fieldSet,
             'source_product_id',
             __('Source Product')->render(),
-            ['source_product_option_id', 'source_product_option_value_id'],
+            ['source_product_option_id'],
+            ['source_product_option_value_id'],
             true
         );
 
