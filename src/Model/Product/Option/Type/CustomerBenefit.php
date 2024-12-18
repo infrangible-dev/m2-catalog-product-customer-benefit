@@ -17,6 +17,22 @@ class CustomerBenefit extends DefaultType
     /**
      * @throws LocalizedException
      */
+    public function prepareForCart()
+    {
+        if ($this->getDataUsingMethod('is_valid')) {
+            $userValue = $this->getDataUsingMethod('user_value');
+
+            return $userValue != 0 ? $userValue : null;
+        }
+
+        throw new LocalizedException(
+            __('We can\'t add the product to the cart because of an option validation issue.')
+        );
+    }
+
+    /**
+     * @throws LocalizedException
+     */
     public function getFormattedOptionValue($optionValue): string
     {
         $option = $this->getOption();

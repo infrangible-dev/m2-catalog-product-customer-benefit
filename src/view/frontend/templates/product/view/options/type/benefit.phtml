@@ -17,6 +17,8 @@ use Magento\Framework\Escaper;
 
 <?php
 $option = $block->getOption();
+$configValue = $block->getPreconfiguredValue($option);
+$checked = is_array($configValue) && in_array($option->getId(), $configValue) ? 'checked' : '';
 $class = $option->getIsRequire() ? ' required' : '';
 $dataSelector = 'options[' . $option->getId() . ']';
 $price = $option->getPrice();
@@ -27,21 +29,33 @@ $price = $option->getPrice();
     </label>
     <div class="control">
         <div class="field choice admin__field admin__field-option">
-            <input type="checkbox"
-                   class="checkbox admin__control-checkbox <?= $option->getIsRequire() ? 'required': ''; ?> product-custom-option"
+            <input type="hidden"
                    name="options[<?= $escaper->escapeHtmlAttr($option->getId()); ?>]"
                    id="options_<?= $escaper->escapeHtmlAttr($option->getId()); ?>"
+                   value="<?= $checked ? 1 : 0 ?>">
+            <input type="checkbox"
+                   class="checkbox admin__control-checkbox <?= $option->getIsRequire() ? 'required': ''; ?> product-custom-option"
+                   name="checkbox_options[<?= $escaper->escapeHtmlAttr($option->getId()); ?>]"
+                   id="checkbox_options_<?= $escaper->escapeHtmlAttr($option->getId()); ?>"
                    value="1"
+                   <?= $checked; ?>
                    data-selector="<?= $escaper->escapeHtmlAttr($dataSelector); ?>"
                    price="<?= $escaper->escapeHtmlAttr($block->getCurrencyByStore($price)); ?>"
             />
             <label class="label admin__field-label"
-                   for="options_<?= $escaper->escapeHtmlAttr($option->getId()); ?>">
+                   for="checkbox_options_<?= $escaper->escapeHtmlAttr($option->getId()); ?>">
                 <span>
                     <?= $escaper->escapeHtml($option->getTitle()); ?>
                 </span>
                 <?= /* @noEscape */ $block->formatPrice($price); ?>
             </label>
+            <script type="text/javascript">
+                require(['jquery', 'domReady!'], function($) {
+                    $("#checkbox_options_<?= $escaper->escapeHtmlAttr($option->getId()); ?>").click(function() {
+                        $("#options_<?= $escaper->escapeHtmlAttr($option->getId()); ?>").val($(this).is(':checked') ? 1 : 0);
+                    });
+                });
+            </script>
         </div>
         <?php if ($option->getIsRequire()): ?>
             <?php if ($option->getType() == 'benefit_checkbox'): ?>

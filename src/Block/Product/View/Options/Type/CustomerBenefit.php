@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Infrangible\CatalogProductCustomerBenefit\Block\Product\View\Options\Type;
 
 use Magento\Catalog\Block\Product\View\Options\AbstractOptions;
+use Magento\Catalog\Model\Product\Option;
 
 /**
  * @author      Andreas Knollmann
@@ -13,6 +14,11 @@ use Magento\Catalog\Block\Product\View\Options\AbstractOptions;
  */
 class CustomerBenefit extends AbstractOptions
 {
+    public function getPreconfiguredValue(Option $option)
+    {
+        return $this->getProduct()->getPreconfiguredValues()->getData('options/' . $option->getId());
+    }
+
     public function getCurrencyByStore(float $price)
     {
         return $this->pricingHelper->currencyByStore(
@@ -26,7 +32,7 @@ class CustomerBenefit extends AbstractOptions
     {
         return parent::_formatPrice(
             [
-                'is_percent' => false,
+                'is_percent'    => false,
                 'pricing_value' => $price
             ]
         );
