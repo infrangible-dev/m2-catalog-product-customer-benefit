@@ -37,7 +37,7 @@ class CustomerBenefit extends DefaultType
     {
         $option = $this->getOption();
 
-        return $option->getTitle();
+        return $option->getData('label') ? $option->getData('label') : $option->getTitle();
     }
 
     /**
@@ -47,6 +47,6 @@ class CustomerBenefit extends DefaultType
     {
         $option = $this->getOption();
 
-        return $option->getTitle();
+        return $option->getData('label') ? $option->getData('label') : $option->getTitle();
     }
 }

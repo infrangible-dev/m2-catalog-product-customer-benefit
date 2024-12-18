@@ -23,44 +23,51 @@ $class = $option->getIsRequire() ? ' required' : '';
 $dataSelector = 'options[' . $option->getId() . ']';
 $price = $option->getPrice();
 ?>
-<div class="field<?= /* @noEscape */ $class ?>">
-    <label class="label" for="select_<?= $escaper->escapeHtmlAttr($option->getId()); ?>">
-        <span><?= $escaper->escapeHtml($option->getTitle()); ?></span>
-    </label>
-    <div class="control">
-        <div class="field choice admin__field admin__field-option">
-            <input type="hidden"
-                   name="options[<?= $escaper->escapeHtmlAttr($option->getId()); ?>]"
-                   id="options_<?= $escaper->escapeHtmlAttr($option->getId()); ?>"
-                   value="<?= $checked ? 1 : 0 ?>">
-            <input type="checkbox"
-                   class="checkbox admin__control-checkbox <?= $option->getIsRequire() ? 'required': ''; ?> product-custom-option"
-                   name="checkbox_options[<?= $escaper->escapeHtmlAttr($option->getId()); ?>]"
-                   id="checkbox_options_<?= $escaper->escapeHtmlAttr($option->getId()); ?>"
-                   value="1"
-                   <?= $checked; ?>
-                   data-selector="<?= $escaper->escapeHtmlAttr($dataSelector); ?>"
-                   price="<?= $escaper->escapeHtmlAttr($block->getCurrencyByStore($price)); ?>"
-            />
-            <label class="label admin__field-label"
-                   for="checkbox_options_<?= $escaper->escapeHtmlAttr($option->getId()); ?>">
-                <span>
-                    <?= $escaper->escapeHtml($option->getTitle()); ?>
-                </span>
-                <?= /* @noEscape */ $block->formatPrice($price); ?>
-            </label>
-            <script type="text/javascript">
-                require(['jquery', 'domReady!'], function($) {
-                    $("#checkbox_options_<?= $escaper->escapeHtmlAttr($option->getId()); ?>").click(function() {
-                        $("#options_<?= $escaper->escapeHtmlAttr($option->getId()); ?>").val($(this).is(':checked') ? 1 : 0);
+<?php if ($option->getData('frontend')): ?>
+    <div class="field<?= /* @noEscape */ $class ?>">
+        <label class="label" for="select_<?= $escaper->escapeHtmlAttr($option->getId()); ?>">
+            <span><?= $escaper->escapeHtml($option->getTitle()); ?></span>
+        </label>
+        <div class="control">
+            <div class="field choice admin__field admin__field-option">
+                <input type="hidden"
+                       name="options[<?= $escaper->escapeHtmlAttr($option->getId()); ?>]"
+                       id="options_<?= $escaper->escapeHtmlAttr($option->getId()); ?>"
+                       value="<?= $checked ? 1 : 0 ?>">
+                <input type="checkbox"
+                       class="checkbox admin__control-checkbox <?= $option->getIsRequire() ? 'required': ''; ?> product-custom-option"
+                       name="checkbox_options[<?= $escaper->escapeHtmlAttr($option->getId()); ?>]"
+                       id="checkbox_options_<?= $escaper->escapeHtmlAttr($option->getId()); ?>"
+                       value="1"
+                       <?= $checked; ?>
+                       data-selector="<?= $escaper->escapeHtmlAttr($dataSelector); ?>"
+                       price="<?= $escaper->escapeHtmlAttr($block->getCurrencyByStore($price)); ?>"
+                />
+                <label class="label admin__field-label"
+                       for="checkbox_options_<?= $escaper->escapeHtmlAttr($option->getId()); ?>">
+                    <span>
+                        <?= $escaper->escapeHtml($option->getData('label') ? $option->getData('label') : $option->getTitle()); ?>
+                    </span>
+                    <?= /* @noEscape */ $block->formatPrice($price); ?>
+                </label>
+                <script type="text/javascript">
+                    require(['jquery', 'domReady!'], function($) {
+                        $("#checkbox_options_<?= $escaper->escapeHtmlAttr($option->getId()); ?>").click(function() {
+                            $("#options_<?= $escaper->escapeHtmlAttr($option->getId()); ?>").val($(this).is(':checked') ? 1 : 0);
+                        });
                     });
-                });
-            </script>
-        </div>
-        <?php if ($option->getIsRequire()): ?>
-            <?php if ($option->getType() == 'benefit_checkbox'): ?>
-                <span id="options-<?= $escaper->escapeHtmlAttr($option->getId()); ?>-container"></span>
+                </script>
+            </div>
+            <?php if ($option->getIsRequire()): ?>
+                <?php if ($option->getType() == 'benefit_checkbox'): ?>
+                    <span id="options-<?= $escaper->escapeHtmlAttr($option->getId()); ?>-container"></span>
+                <?php endif; ?>
             <?php endif; ?>
-        <?php endif; ?>
+        </div>
     </div>
-</div>
+<?php else: ?>
+    <input type="hidden"
+           name="options[<?= $escaper->escapeHtmlAttr($option->getId()); ?>]"
+           id="options_<?= $escaper->escapeHtmlAttr($option->getId()); ?>"
+           value="<?= $checked ? 1 : 0 ?>">
+<?php endif; ?>

@@ -90,6 +90,51 @@ class UpgradeSchema implements UpgradeSchemaInterface
             }
         }
 
+        if (version_compare(
+            $context->getVersion(),
+            '1.3.0',
+            '<'
+        )) {
+            $connection = $setup->getConnection();
+
+            $catalogProductOptionTableName = $setup->getTable('catalog_product_option');
+
+            if (! $connection->tableColumnExists(
+                $catalogProductOptionTableName,
+                'frontend'
+            )) {
+                $connection->addColumn(
+                    $catalogProductOptionTableName,
+                    'frontend',
+                    [
+                        'type'     => Table::TYPE_SMALLINT,
+                        'length'   => 5,
+                        'nullable' => true,
+                        'unsigned' => true,
+                        'comment'  => 'Frontend',
+                        'after'    => 'image_size_y'
+                    ]
+                );
+            }
+
+            if (! $connection->tableColumnExists(
+                $catalogProductOptionTableName,
+                'label'
+            )) {
+                $connection->addColumn(
+                    $catalogProductOptionTableName,
+                    'label',
+                    [
+                        'type'     => Table::TYPE_TEXT,
+                        'length'   => 255,
+                        'nullable' => true,
+                        'comment'  => 'Label',
+                        'after'    => 'frontend'
+                    ]
+                );
+            }
+        }
+
         $setup->endSetup();
     }
 }

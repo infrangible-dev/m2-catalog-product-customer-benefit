@@ -23,12 +23,27 @@ use Magento\Framework\View\TemplateEngine\Php;
             <thead>
                 <tr class="headings">
                     <th class="col-sku"><?= $escaper->escapeHtml(__('SKU')); ?></th>
+                    <th class="col-frontend"><?= $escaper->escapeHtml(__('Frontend')); ?></th>
+                    <th class="col-label"><?= $escaper->escapeHtml(__('Label')); ?></th>
                 </tr>
             </thead>
             <tr>
                 <td>
                     <!--suppress HtmlFormInputWithoutLabel -->
-                    <input name="product[options][<%- data.option_id %>][sku]" class="input-text type-sku" value="<%- data.sku %>" type="text">
+                    <input name="product[options][<%- data.option_id %>][sku]"
+                           class="input-text type-sku"
+                           value="<%- data.sku %>"
+                           type="text">
+                    <!--suppress HtmlFormInputWithoutLabel -->
+                    <input name="product[options][<%- data.option_id %>][frontend]"
+                           class="input-text type-frontend"
+                           value="<%- data.frontend %>"
+                           type="checkbox">
+                    <!--suppress HtmlFormInputWithoutLabel -->
+                    <input name="product[options][<%- data.option_id %>][label]"
+                           class="input-text type-label"
+                           value="<%- data.label %>"
+                           type="text">
                 </td>
             </tr>
         </table>
