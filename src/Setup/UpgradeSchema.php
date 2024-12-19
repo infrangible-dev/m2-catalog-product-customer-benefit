@@ -22,13 +22,13 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $customerBenefitTableName = $setup->getTable('catalog_product_customer_benefit');
 
+        $connection = $setup->getConnection();
+
         if (version_compare(
             $context->getVersion(),
             '1.1.0',
             '<'
         )) {
-            $connection = $setup->getConnection();
-
             if (! $connection->tableColumnExists(
                 $customerBenefitTableName,
                 'website_id'
@@ -69,8 +69,6 @@ class UpgradeSchema implements UpgradeSchemaInterface
             '1.2.0',
             '<'
         )) {
-            $connection = $setup->getConnection();
-
             if (! $connection->tableColumnExists(
                 $customerBenefitTableName,
                 'source_product_option_id'
@@ -95,8 +93,6 @@ class UpgradeSchema implements UpgradeSchemaInterface
             '1.3.0',
             '<'
         )) {
-            $connection = $setup->getConnection();
-
             $catalogProductOptionTableName = $setup->getTable('catalog_product_option');
 
             if (! $connection->tableColumnExists(
@@ -130,6 +126,29 @@ class UpgradeSchema implements UpgradeSchemaInterface
                         'nullable' => true,
                         'comment'  => 'Label',
                         'after'    => 'frontend'
+                    ]
+                );
+            }
+        }
+
+        if (version_compare(
+            $context->getVersion(),
+            '1.5.0',
+            '<'
+        )) {
+            if (! $connection->tableColumnExists(
+                $customerBenefitTableName,
+                'customer_group_ids'
+            )) {
+                $connection->addColumn(
+                    $customerBenefitTableName,
+                    'customer_group_ids',
+                    [
+                        'type'     => Table::TYPE_TEXT,
+                        'length'   => 1024,
+                        'nullable' => true,
+                        'comment'  => 'Customer Group Ids',
+                        'after'    => 'created_at_days_before'
                     ]
                 );
             }

@@ -72,6 +72,9 @@ class CustomerBenefit extends Base implements CalculationDataInterface
     /** @var int */
     private $websiteId;
 
+    /** @var array */
+    private $customerGroupIds = [];
+
     public function __construct(
         SimpleFactory $pricesFactory,
         AmountFactory $amountFactory,
@@ -208,6 +211,16 @@ class CustomerBenefit extends Base implements CalculationDataInterface
         $this->websiteId = $websiteId;
     }
 
+    public function getCustomerGroupIds(): array
+    {
+        return $this->customerGroupIds;
+    }
+
+    public function setCustomerGroupIds(array $customerGroupIds): void
+    {
+        $this->customerGroupIds = $customerGroupIds;
+    }
+
     public function hasProductCalculation(Product $product): bool
     {
         return $product->getId() == $this->getTargetProductId();
@@ -251,6 +264,18 @@ class CustomerBenefit extends Base implements CalculationDataInterface
         $currentTimestamp = (new \DateTime())->getTimestamp();
 
         $customer = $this->customerHelper->loadCustomer($this->variables->intValue($customerId));
+
+        if ($this->getCustomerGroupIds()) {
+            $customerGroupId = $customer->getGroupId();
+
+            if (! in_array(
+                $customerGroupId,
+                $this->getCustomerGroupIds()
+            )) {
+                return false;
+            }
+        }
+
         $customerCreatedAtTimestamp = $customer->getCreatedAtTimestamp();
 
         $items = $quote->getItemsCollection();

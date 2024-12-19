@@ -79,6 +79,7 @@ class Data extends AbstractHelper
         $collection->addActiveFilter();
         $collection->addPriorityOrder();
         $collection->addWebsiteFilter($this->variables->intValue($websiteId));
+        $collection->addCustomerGroupFilter($this->variables->intValue($customer->getGroupId()));
 
         /** @var CustomerBenefit $customerBenefit */
         foreach ($collection as $customerBenefit) {

@@ -80,6 +80,9 @@ class CatalogProductPriceCalculation implements ObserverInterface
                     $this->variables->intValue($customerBenefit->getCreatedAtDaysBefore())
                 );
             }
+            if ($customerBenefit->getCustomerGroupIds()) {
+                $customerBenefitCalculation->setCustomerGroupIds($customerBenefit->getCustomerGroupIds());
+            }
             $customerBenefitCalculation->setPriority($this->variables->intValue($customerBenefit->getPriority()));
             $customerBenefitCalculation->setWebsiteId(
                 $this->variables->intValue($customerBenefit->getWebsiteId())

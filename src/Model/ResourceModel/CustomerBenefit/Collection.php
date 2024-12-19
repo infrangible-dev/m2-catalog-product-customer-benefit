@@ -22,6 +22,33 @@ class Collection extends AbstractCollection
         );
     }
 
+    protected function _afterLoad(): Collection
+    {
+        parent::_afterLoad();
+
+        /** @var CustomerBenefit $item */
+        foreach ($this->_items as $item) {
+            $customerGroupIds = $item->getData('customer_group_ids');
+
+            if ($customerGroupIds && ! is_array($customerGroupIds)) {
+                $item->setData(
+                    'customer_group_ids',
+                    explode(
+                        ',',
+                        $customerGroupIds
+                    )
+                );
+            } else {
+                $item->setData(
+                    'customer_group_ids',
+                    []
+                );
+            }
+        }
+
+        return $this;
+    }
+
     public function addSourceProductFilter(int $productId)
     {
         $this->addFieldToFilter(
@@ -64,5 +91,13 @@ class Collection extends AbstractCollection
                 $websiteId
             );
         }
+    }
+
+    public function addCustomerGroupFilter(int $customerGroupId)
+    {
+        $this->getSelect()->where(
+            'FIND_IN_SET(?, main_table.customer_group_ids) > 0 OR main_table.customer_group_id IS NULL',
+            $customerGroupId
+        );
     }
 }

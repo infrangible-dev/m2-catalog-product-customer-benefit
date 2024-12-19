@@ -62,6 +62,8 @@ class Grid extends \Infrangible\BackendWidget\Block\Grid
             __('Days After Created At')->render()
         );
 
+        $this->addCustomerGroupsColumn('customer_group_ids');
+
         $this->addTextColumn(
             'api_flag',
             __('API Flag')->render()
@@ -85,6 +87,6 @@ class Grid extends \Infrangible\BackendWidget\Block\Grid
      */
     protected function getHiddenFieldNames(): array
     {
-        return [];
+        return ['source_product_option_value_id', 'limit', 'api_flag'];
     }
 }

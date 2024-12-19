@@ -75,6 +75,11 @@ class Form extends \Infrangible\BackendWidget\Block\Form
             __('Days After Created At')->render()
         );
 
+        $this->addCustomerGroupMultiSelectField(
+            $fieldSet,
+            'customer_group_ids'
+        );
+
         $this->addTextField(
             $fieldSet,
             'api_flag',
@@ -87,7 +92,10 @@ class Form extends \Infrangible\BackendWidget\Block\Form
             __('Priority')->render()
         );
 
-        $this->addWebsiteSelectField($fieldSet, 'website_id');
+        $this->addWebsiteSelectField(
+            $fieldSet,
+            'website_id'
+        );
 
         $this->addYesNoWithDefaultField(
             $fieldSet,

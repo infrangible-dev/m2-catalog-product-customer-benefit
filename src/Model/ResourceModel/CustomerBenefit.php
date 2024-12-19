@@ -22,6 +22,30 @@ class CustomerBenefit extends AbstractDb
         );
     }
 
+    protected function _afterLoad(AbstractModel $object): CustomerBenefit
+    {
+        parent::_afterLoad($object);
+
+        $customerGroupIds = $object->getData('customer_group_ids');
+
+        if ($customerGroupIds && ! is_array($customerGroupIds)) {
+            $object->setData(
+                'customer_group_ids',
+                explode(
+                    ',',
+                    $customerGroupIds
+                )
+            );
+        } else {
+            $object->setData(
+                'customer_group_ids',
+                []
+            );
+        }
+
+        return $this;
+    }
+
     /**
      * @throws \Exception
      */
@@ -68,6 +92,24 @@ class CustomerBenefit extends AbstractDb
 
         if ($object->getData('created_at_days_before') == 0 || $object->getData('created_at_days_before') == '') {
             $object->setData('created_at_days_before');
+        }
+
+        $customerGroupIds = $object->getData('customer_group_ids');
+
+        if (is_array($customerGroupIds)) {
+            if (count($customerGroupIds) > 0) {
+                $object->setData(
+                    'customer_group_ids',
+                    implode(
+                        ',',
+                        $customerGroupIds
+                    )
+                );
+            } else {
+                $object->setData('customer_group_ids');
+            }
+        } elseif ($object->getData('customer_group_ids') == '') {
+            $object->setData('customer_group_ids');
         }
 
         if ($object->getData('api_flag') == '') {
