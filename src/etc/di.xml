@@ -16,4 +16,7 @@
             </argument>
         </arguments>
     </type>
+    <type name="Magento\Sales\Api\OrderRepositoryInterface">
+        <plugin name="infrangible_catalogproductcustomerbenefit" type="Infrangible\CatalogProductCustomerBenefit\Plugin\Sales\Api\OrderRepositoryInterface"/>
+    </type>
 </config>

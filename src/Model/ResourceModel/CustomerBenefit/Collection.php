@@ -96,7 +96,7 @@ class Collection extends AbstractCollection
     public function addCustomerGroupFilter(int $customerGroupId)
     {
         $this->getSelect()->where(
-            'FIND_IN_SET(?, main_table.customer_group_ids) > 0 OR main_table.customer_group_id IS NULL',
+            'FIND_IN_SET(?, main_table.customer_group_ids) > 0 OR main_table.customer_group_ids IS NULL',
             $customerGroupId
         );
     }

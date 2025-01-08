@@ -130,7 +130,8 @@ class Data extends AbstractHelper
                 'price'             => $customerBenefit->getPrice(),
                 'discount'          => $customerBenefit->getDiscount(),
                 'limit'             => $customerBenefit->getLimit(),
-                'priority'          => $customerBenefit->getPriority()
+                'priority'          => $customerBenefit->getPriority(),
+                'api_flag'          => $customerBenefit->getApiFlag()
             ];
         }
 

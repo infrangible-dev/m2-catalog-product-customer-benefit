@@ -14,6 +14,7 @@ use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Item;
+use Magento\Sales\Model\Order\ItemRepository;
 
 /**
  * @author      Andreas Knollmann
@@ -37,18 +38,23 @@ class SalesOrderInvoiceSaveAfter implements ObserverInterface
     /** @var Data */
     protected $helper;
 
+    /** @var ItemRepository */
+    protected $itemRepository;
+
     public function __construct(
         Variables $variables,
         Arrays $arrays,
         Data $helper,
         ProductCustomerPriceFactory $customerPriceFactory,
-        \Infrangible\CatalogProductCustomerPrice\Model\ResourceModel\ProductCustomerPriceFactory $customerPriceResourceFactory
+        \Infrangible\CatalogProductCustomerPrice\Model\ResourceModel\ProductCustomerPriceFactory $customerPriceResourceFactory,
+        ItemRepository $itemRepository
     ) {
         $this->variables = $variables;
         $this->arrays = $arrays;
         $this->helper = $helper;
         $this->customerPriceFactory = $customerPriceFactory;
         $this->customerPriceResourceFactory = $customerPriceResourceFactory;
+        $this->itemRepository = $itemRepository;
     }
 
     /**
@@ -165,6 +171,15 @@ class SalesOrderInvoiceSaveAfter implements ObserverInterface
                     $customerPrice->setActive(1);
 
                     $customerPriceResource->save($customerPrice);
+
+                    $sourceProductOptions[ 'customer_benefit_api_flag' ] = $this->arrays->getValue(
+                        $targetProductPriceData,
+                        'api_flag'
+                    );
+
+                    $item->setProductOptions($sourceProductOptions);
+
+                    $this->itemRepository->save($item);
                 }
             }
         }

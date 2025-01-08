@@ -38,6 +38,8 @@ use Magento\Framework\Registry;
  * @method void setCreatedAtDaysBefore(string $createdAtDaysBefore)
  * @method array|string getCustomerGroupIds()
  * @method void setCustomerGroupIds(array $customerGroupIds)
+ * @method string getApiFlag()
+ * @method void setApiFlag(string $apiFlag)
  * @method int getPriority()
  * @method void setPriority(int $priority)
  * @method int getWebsiteId()
