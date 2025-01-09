@@ -106,6 +106,13 @@ class OrderRepositoryInterface
                 )
             );
 
+            foreach ($orderApiFlags as $orderApiFlag) {
+                $extensionAttributes->setData(
+                    $orderApiFlag,
+                    true
+                );
+            }
+
             $order->setExtensionAttributes($extensionAttributes);
         }
     }

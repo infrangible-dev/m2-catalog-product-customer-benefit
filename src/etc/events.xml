@@ -9,6 +9,9 @@
     <event name="sales_order_invoice_save_after">
         <observer name="infrangible_catalogproductcustomerbenefit" instance="Infrangible\CatalogProductCustomerBenefit\Observer\SalesOrderInvoiceSaveAfter"/>
     </event>
+    <event name="sales_order_place_after">
+        <observer name="infrangible_catalogproductcustomerbenefit" instance="Infrangible\CatalogProductCustomerBenefit\Observer\SalesOrderPlaceAfter"/>
+    </event>
     <event name="customer_benefit_delete_commit_after">
         <observer name="infrangible_catalogproductcustomerbenefit" instance="Infrangible\CatalogProductCustomerBenefit\Observer\CustomerBenefitDeleteCommitAfter"/>
     </event>

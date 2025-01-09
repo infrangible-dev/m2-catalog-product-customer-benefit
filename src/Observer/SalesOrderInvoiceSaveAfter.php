@@ -6,9 +6,7 @@ namespace Infrangible\CatalogProductCustomerBenefit\Observer;
 
 use FeWeDev\Base\Arrays;
 use FeWeDev\Base\Variables;
-use Infrangible\CatalogProductCustomerBenefit\Helper\Data;
 use Infrangible\CatalogProductCustomerPrice\Model\ProductCustomerPriceFactory;
-use Magento\Catalog\Model\Product\Option;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Exception\AlreadyExistsException;
@@ -35,23 +33,18 @@ class SalesOrderInvoiceSaveAfter implements ObserverInterface
     /** @var Arrays */
     protected $arrays;
 
-    /** @var Data */
-    protected $helper;
-
     /** @var ItemRepository */
     protected $itemRepository;
 
     public function __construct(
         Variables $variables,
         Arrays $arrays,
-        Data $helper,
         ProductCustomerPriceFactory $customerPriceFactory,
         \Infrangible\CatalogProductCustomerPrice\Model\ResourceModel\ProductCustomerPriceFactory $customerPriceResourceFactory,
         ItemRepository $itemRepository
     ) {
         $this->variables = $variables;
         $this->arrays = $arrays;
-        $this->helper = $helper;
         $this->customerPriceFactory = $customerPriceFactory;
         $this->customerPriceResourceFactory = $customerPriceResourceFactory;
         $this->itemRepository = $itemRepository;
@@ -87,51 +80,11 @@ class SalesOrderInvoiceSaveAfter implements ObserverInterface
 
             /** @var Item $item */
             foreach ($items as $item) {
-                $sourceProduct = $item->getProduct();
-
-                $sourceProductId = $sourceProduct->getId();
-
-                $sourceProductOptionIds = [];
-                $sourceProductOptionValueIds = [];
-
                 $sourceProductOptions = $item->getProductOptions();
 
-                foreach ($this->arrays->getValue(
+                $targetProductPriceData = $this->arrays->getValue(
                     $sourceProductOptions,
-                    'options',
-                    []
-                ) as $productOption) {
-                    $sourceProductOptionId = $this->arrays->getValue(
-                        $productOption,
-                        'option_id'
-                    );
-
-                    /** @var Option $sourceProductOption */
-                    foreach ($sourceProduct->getProductOptionsCollection() as $sourceProductOption) {
-                        if ($sourceProductOption->getId() == $sourceProductOptionId) {
-                            $sourceProductOptionValues = $sourceProductOption->getValues();
-
-                            if ($sourceProductOptionValues === null) {
-                                $sourceProductOptionIds[] = $sourceProductOptionId;
-                            } else {
-                                $sourceProductOptionValueId = $this->arrays->getValue(
-                                    $productOption,
-                                    'option_value'
-                                );
-
-                                if ($sourceProductOptionValueId) {
-                                    $sourceProductOptionValueIds[] = $sourceProductOptionValueId;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                $targetProductPriceData = $this->helper->getTargetProductPriceData(
-                    $this->variables->intValue($sourceProductId),
-                    $sourceProductOptionIds,
-                    $sourceProductOptionValueIds,
-                    $this->variables->intValue($customerId)
+                    'customer_benefit_data'
                 );
 
                 if ($targetProductPriceData) {

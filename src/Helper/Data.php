@@ -126,12 +126,13 @@ class Data extends AbstractHelper
             }
 
             return [
-                'target_product_id' => $customerBenefit->getTargetProductId(),
-                'price'             => $customerBenefit->getPrice(),
-                'discount'          => $customerBenefit->getDiscount(),
-                'limit'             => $customerBenefit->getLimit(),
-                'priority'          => $customerBenefit->getPriority(),
-                'api_flag'          => $customerBenefit->getApiFlag()
+                'customer_benefit_id' => $customerBenefit->getId(),
+                'target_product_id'   => $customerBenefit->getTargetProductId(),
+                'price'               => $customerBenefit->getPrice(),
+                'discount'            => $customerBenefit->getDiscount(),
+                'limit'               => $customerBenefit->getLimit(),
+                'priority'            => $customerBenefit->getPriority(),
+                'api_flag'            => $customerBenefit->getApiFlag()
             ];
         }
 

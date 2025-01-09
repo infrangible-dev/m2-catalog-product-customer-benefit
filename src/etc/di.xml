@@ -16,6 +16,9 @@
             </argument>
         </arguments>
     </type>
+    <type name="Magento\Framework\Reflection\ExtensionAttributesProcessor">
+        <plugin name="infrangible_catalogproductcustomerbenefit" type="Infrangible\CatalogProductCustomerBenefit\Plugin\Framework\Reflection\ExtensionAttributesProcessor"/>
+    </type>
     <type name="Magento\Sales\Api\OrderRepositoryInterface">
         <plugin name="infrangible_catalogproductcustomerbenefit" type="Infrangible\CatalogProductCustomerBenefit\Plugin\Sales\Api\OrderRepositoryInterface"/>
     </type>
