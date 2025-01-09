@@ -9,7 +9,4 @@
     <type name="Magento\Catalog\Block\Product\View\Options">
         <plugin name="infrangible_catalogproductcustomerbenefit" type="Infrangible\CatalogProductCustomerBenefit\Plugin\Catalog\Block\Product\View\Options"/>
     </type>
-    <type name="Magento\Catalog\Model\Product\Option">
-        <plugin name="infrangible_catalogproductcustomerbenefit" type="Infrangible\CatalogProductCustomerBenefit\Plugin\Catalog\Model\Product\Option"/>
-    </type>
 </config>

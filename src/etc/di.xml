@@ -15,6 +15,7 @@
                 <item name="benefit_checkbox" xsi:type="string">benefit</item>
             </argument>
         </arguments>
+        <plugin name="infrangible_catalogproductcustomerbenefit" type="Infrangible\CatalogProductCustomerBenefit\Plugin\Catalog\Model\Product\Option"/>
     </type>
     <type name="Magento\Framework\Reflection\ExtensionAttributesProcessor">
         <plugin name="infrangible_catalogproductcustomerbenefit" type="Infrangible\CatalogProductCustomerBenefit\Plugin\Framework\Reflection\ExtensionAttributesProcessor"/>
