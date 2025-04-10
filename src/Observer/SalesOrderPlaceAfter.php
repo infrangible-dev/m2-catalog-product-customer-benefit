@@ -65,29 +65,58 @@ class SalesOrderPlaceAfter implements ObserverInterface
 
                 $sourceProductOptionIds = [];
                 $sourceProductOptionValueIds = [];
+                $customerBenefitOptionIds = [];
 
-                $sourceProductOptions = $item->getProductOptions();
+                $itemProductOptions = $item->getProductOptions();
 
                 foreach ($this->arrays->getValue(
-                    $sourceProductOptions,
+                    $itemProductOptions,
                     'options',
                     []
-                ) as $productOption) {
-                    $sourceProductOptionId = $this->arrays->getValue(
-                        $productOption,
+                ) as $itemProductOptionKey => $itemProductOption) {
+                    $itemProductOptionId = $this->arrays->getValue(
+                        $itemProductOption,
                         'option_id'
                     );
 
+                    /** @var Option $productOption */
+                    foreach ($sourceProduct->getProductOptionsCollection() as $productOption) {
+                        if ($productOption->getId() == $itemProductOptionId) {
+                            $productOptionPrice = $productOption->getPrice();
+
+                            if ($item->getDiscountAmount()) {
+                                $itemProductOptions[ 'options' ][ $itemProductOptionKey ][ 'original_price' ] =
+                                    $productOptionPrice;
+
+                                $productOptionDiscount = round(
+                                    $productOptionPrice * $item->getDiscountAmount() / $item->getPrice(),
+                                    2
+                                );
+
+                                $itemProductOptions[ 'options' ][ $itemProductOptionKey ][ 'discount' ] =
+                                    $productOptionDiscount;
+
+                                $productOptionPrice -= $productOptionDiscount;
+                            }
+
+                            $itemProductOptions[ 'options' ][ $itemProductOptionKey ][ 'price' ] = $productOptionPrice;
+                        }
+                    }
+
                     /** @var Option $sourceProductOption */
                     foreach ($sourceProduct->getProductOptionsCollection() as $sourceProductOption) {
-                        if ($sourceProductOption->getId() == $sourceProductOptionId) {
+                        if ($sourceProductOption->getId() == $itemProductOptionId) {
                             $sourceProductOptionValues = $sourceProductOption->getValues();
 
                             if ($sourceProductOptionValues === null) {
-                                $sourceProductOptionIds[] = $sourceProductOptionId;
+                                $sourceProductOptionIds[] = $itemProductOptionId;
+
+                                if ($sourceProductOption->getType() === 'benefit_checkbox') {
+                                    $customerBenefitOptionIds[] = $itemProductOptionId;
+                                }
                             } else {
                                 $sourceProductOptionValueId = $this->arrays->getValue(
-                                    $productOption,
+                                    $itemProductOption,
                                     'option_value'
                                 );
 
@@ -103,13 +132,14 @@ class SalesOrderPlaceAfter implements ObserverInterface
                     $this->variables->intValue($sourceProductId),
                     $sourceProductOptionIds,
                     $sourceProductOptionValueIds,
+                    $customerBenefitOptionIds,
                     $this->variables->intValue($customerId)
                 );
 
                 if ($targetProductPriceData) {
-                    $sourceProductOptions[ 'customer_benefit_data' ] = $targetProductPriceData;
+                    $itemProductOptions[ 'customer_benefit_data' ] = $targetProductPriceData;
 
-                    $item->setProductOptions($sourceProductOptions);
+                    $item->setProductOptions($itemProductOptions);
                 }
             }
         }

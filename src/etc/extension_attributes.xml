@@ -12,4 +12,9 @@
     <extension_attributes for="Magento\Sales\Api\Data\OrderItemInterface">
         <attribute code="customer_benefit_api_flag" type="string"/>
     </extension_attributes>
+    <extension_attributes for="Magento\Catalog\Api\Data\CustomOptionInterface">
+        <attribute code="original_price" type="float"/>
+        <attribute code="discount" type="float"/>
+        <attribute code="price" type="float"/>
+    </extension_attributes>
 </config>

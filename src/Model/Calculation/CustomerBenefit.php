@@ -31,7 +31,7 @@ class CustomerBenefit extends Base implements CalculationDataInterface
     protected $checkoutSession;
 
     /** @var Data */
-    protected $helper;
+    protected $priceCalculationHelper;
 
     /** @var Variables */
     protected $variables;
@@ -44,6 +44,9 @@ class CustomerBenefit extends Base implements CalculationDataInterface
 
     /** @var Stores */
     protected $storeHelper;
+
+    /** @var \Infrangible\CatalogProductCustomerBenefit\Helper\Data */
+    protected $helper;
 
     /** @var int */
     private $sourceProductId;
@@ -79,11 +82,12 @@ class CustomerBenefit extends Base implements CalculationDataInterface
         SimpleFactory $pricesFactory,
         AmountFactory $amountFactory,
         Session $checkoutSession,
-        Data $helper,
+        Data $priceCalculationHelper,
         Variables $variables,
         Json $json,
         Customer $customerHelper,
-        Stores $storeHelper
+        Stores $storeHelper,
+        \Infrangible\CatalogProductCustomerBenefit\Helper\Data $helper
     ) {
         parent::__construct(
             $pricesFactory,
@@ -91,11 +95,12 @@ class CustomerBenefit extends Base implements CalculationDataInterface
         );
 
         $this->checkoutSession = $checkoutSession;
-        $this->helper = $helper;
+        $this->priceCalculationHelper = $priceCalculationHelper;
         $this->variables = $variables;
         $this->json = $json;
         $this->customerHelper = $customerHelper;
         $this->storeHelper = $storeHelper;
+        $this->helper = $helper;
     }
 
     public function getCode(): string
@@ -231,7 +236,7 @@ class CustomerBenefit extends Base implements CalculationDataInterface
      */
     public function getProductPrices(Product $product): PricesInterface
     {
-        return $this->helper->calculatePrices(
+        return $this->priceCalculationHelper->calculatePrices(
             $product,
             $this
         );
@@ -242,7 +247,7 @@ class CustomerBenefit extends Base implements CalculationDataInterface
      * @throws LocalizedException
      * @throws \Exception
      */
-    public function isActive(): bool
+    public function isAvailableForProduct(): bool
     {
         $quote = $this->checkoutSession->getQuote();
 
@@ -261,8 +266,6 @@ class CustomerBenefit extends Base implements CalculationDataInterface
             }
         }
 
-        $currentTimestamp = (new \DateTime())->getTimestamp();
-
         $customer = $this->customerHelper->loadCustomer($this->variables->intValue($customerId));
 
         if ($this->getCustomerGroupIds()) {
@@ -276,7 +279,17 @@ class CustomerBenefit extends Base implements CalculationDataInterface
             }
         }
 
-        $customerCreatedAtTimestamp = $customer->getCreatedAtTimestamp();
+        $createdAtDaysBefore = $this->getCreatedAtDaysBefore();
+
+        if ($createdAtDaysBefore) {
+            $checkTimestamp = $this->helper->getCustomerCheckTimestamp($customer) + $createdAtDaysBefore * 24 * 60 * 60;
+
+            $currentTimestamp = (new \DateTime())->getTimestamp();
+
+            if ($currentTimestamp > $checkTimestamp) {
+                return false;
+            }
+        }
 
         $items = $quote->getItemsCollection();
 
@@ -356,19 +369,28 @@ class CustomerBenefit extends Base implements CalculationDataInterface
                 }
             }
 
-            $createdAtDaysBefore = $this->getCreatedAtDaysBefore();
-
-            if ($createdAtDaysBefore) {
-                $checkTimestamp = $customerCreatedAtTimestamp + $createdAtDaysBefore * 24 * 60 * 60;
-
-                if ($currentTimestamp > $checkTimestamp) {
-                    continue;
-                }
-            }
-
             return true;
         }
 
         return false;
+    }
+
+    public function hasProductQty(float $qty): bool
+    {
+        return true;
+    }
+
+    /**
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
+     */
+    public function isAvailableForQuoteItem(Item $item, array $calculatedItems): bool
+    {
+        return $this->isAvailableForProduct();
+    }
+
+    public function hasQuoteItemQty(Item $item, array $calculatedItems): bool
+    {
+        return true;
     }
 }

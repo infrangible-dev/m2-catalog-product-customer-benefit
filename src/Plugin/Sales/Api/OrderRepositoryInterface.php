@@ -6,6 +6,10 @@ namespace Infrangible\CatalogProductCustomerBenefit\Plugin\Sales\Api;
 
 use FeWeDev\Base\Arrays;
 use FeWeDev\Base\Variables;
+use Magento\Catalog\Api\Data\CustomOptionExtension;
+use Magento\Catalog\Api\Data\ProductOptionExtension;
+use Magento\Catalog\Model\CustomOptions\CustomOption;
+use Magento\Catalog\Model\Product\Option;
 use Magento\Sales\Api\Data\OrderExtensionFactory;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\Data\OrderItemExtensionFactory;
@@ -71,10 +75,10 @@ class OrderRepositoryInterface
 
         foreach ($order->getItems() as $item) {
             if ($item instanceof Item) {
-                $sourceProductOptions = $item->getProductOptions();
+                $itemProductOptions = $item->getProductOptions();
 
                 $apiFlag = $this->arrays->getValue(
-                    $sourceProductOptions,
+                    $itemProductOptions,
                     'customer_benefit_api_flag'
                 );
 
@@ -88,6 +92,63 @@ class OrderRepositoryInterface
                     $extensionAttributes->setCustomerBenefitApiFlag($apiFlag);
 
                     $item->setExtensionAttributes($extensionAttributes);
+                }
+
+                $itemProductOptionsOptions = $this->arrays->getValue(
+                    $itemProductOptions,
+                    'options',
+                    []
+                );
+
+                foreach ($itemProductOptionsOptions as $itemProductOptionsOption) {
+                    $itemProductOptionsOptionId = $this->arrays->getValue(
+                        $itemProductOptionsOption,
+                        'option_id'
+                    );
+
+                    /** @var Option $productOptionData */
+                    $productOptionData = $item->getProductOption();
+
+                    /** @var ProductOptionExtension $productOptionDataAttributes */
+                    $productOptionDataAttributes = $productOptionData->getExtensionAttributes();
+
+                    $customOptions = $productOptionDataAttributes->getCustomOptions();
+
+                    /** @var CustomOption $customOption */
+                    foreach ($customOptions as $customOption) {
+                        if ($customOption->getOptionId() == $itemProductOptionsOptionId) {
+                            /** @var CustomOptionExtension $customOptionExtensionAttributes */
+                            $customOptionExtensionAttributes = $customOption->getExtensionAttributes();
+
+                            $itemProductOptionsOptionOriginalPrice = $this->arrays->getValue(
+                                $itemProductOptionsOption,
+                                'original_price'
+                            );
+                            if ($itemProductOptionsOptionOriginalPrice !== null) {
+                                $customOptionExtensionAttributes->setOriginalPrice(
+                                    $itemProductOptionsOptionOriginalPrice
+                                );
+                            }
+
+                            $itemProductOptionsOptionDiscount = $this->arrays->getValue(
+                                $itemProductOptionsOption,
+                                'discount'
+                            );
+                            if ($itemProductOptionsOptionDiscount !== null) {
+                                $customOptionExtensionAttributes->setDiscount($itemProductOptionsOptionDiscount);
+                            }
+
+                            $itemProductOptionsOptionPrice = $this->arrays->getValue(
+                                $itemProductOptionsOption,
+                                'price'
+                            );
+                            if ($itemProductOptionsOptionPrice) {
+                                $customOptionExtensionAttributes->setPrice($itemProductOptionsOptionPrice);
+                            }
+
+                            $customOption->setExtensionAttributes($customOptionExtensionAttributes);
+                        }
+                    }
                 }
             }
         }

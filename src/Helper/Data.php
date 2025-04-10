@@ -8,8 +8,11 @@ use FeWeDev\Base\Variables;
 use Infrangible\CatalogProductCustomerBenefit\Model\CustomerBenefit;
 use Infrangible\CatalogProductCustomerBenefit\Model\ResourceModel\CustomerBenefit\CollectionFactory;
 use Infrangible\CatalogProductCustomerPrice\Helper\Cache;
+use Infrangible\Core\Helper\Attribute;
 use Infrangible\Core\Helper\Customer;
+use Infrangible\Core\Helper\Database;
 use Infrangible\Core\Helper\Stores;
+use Magento\Customer\Model\Session;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 
@@ -38,6 +41,15 @@ class Data extends AbstractHelper
     /** @var CollectionFactory */
     protected $customerBenefitCollectionFactory;
 
+    /** @var Session */
+    protected $customerSession;
+
+    /** @var Attribute */
+    protected $attributeHelper;
+
+    /** @var Database */
+    protected $databaseHelper;
+
     public function __construct(
         Context $context,
         CollectionFactory $collectionFactory,
@@ -45,7 +57,10 @@ class Data extends AbstractHelper
         Variables $variables,
         Cache $cacheHelper,
         Stores $storeHelper,
-        CollectionFactory $customerBenefitCollectionFactory
+        CollectionFactory $customerBenefitCollectionFactory,
+        Session $customerSession,
+        Attribute $attributeHelper,
+        Database $databaseHelper
     ) {
         parent::__construct($context);
 
@@ -55,6 +70,9 @@ class Data extends AbstractHelper
         $this->cacheHelper = $cacheHelper;
         $this->storeHelper = $storeHelper;
         $this->customerBenefitCollectionFactory = $customerBenefitCollectionFactory;
+        $this->customerSession = $customerSession;
+        $this->attributeHelper = $attributeHelper;
+        $this->databaseHelper = $databaseHelper;
     }
 
     /**
@@ -64,6 +82,7 @@ class Data extends AbstractHelper
         int $sourceProductId,
         array $sourceProductOptionIds,
         array $sourceProductOptionValueIds,
+        array $customerBenefitOptionIds,
         int $customerId
     ): array {
         $website = $this->storeHelper->getWebsite();
@@ -72,7 +91,7 @@ class Data extends AbstractHelper
         $currentTimestamp = (new \DateTime())->getTimestamp();
 
         $customer = $this->customerHelper->loadCustomer($this->variables->intValue($customerId));
-        $customerCreatedAtTimestamp = $customer->getCreatedAtTimestamp();
+        $customerCheckTimestamp = $this->getCustomerCheckTimestamp($customer);
 
         $collection = $this->collectionFactory->create();
         $collection->addSourceProductFilter($this->variables->intValue($sourceProductId));
@@ -80,6 +99,8 @@ class Data extends AbstractHelper
         $collection->addPriorityOrder();
         $collection->addWebsiteFilter($this->variables->intValue($websiteId));
         $collection->addCustomerGroupFilter($this->variables->intValue($customer->getGroupId()));
+
+        $isPaid = false;
 
         /** @var CustomerBenefit $customerBenefit */
         foreach ($collection as $customerBenefit) {
@@ -96,6 +117,12 @@ class Data extends AbstractHelper
 
                 if (! $hasProductOption) {
                     continue;
+                }
+
+                foreach ($customerBenefitOptionIds as $optionId) {
+                    if ($optionId == $sourceProductOptionId) {
+                        $isPaid = true;
+                    }
                 }
             }
 
@@ -118,7 +145,7 @@ class Data extends AbstractHelper
             $createdAtDaysBefore = $customerBenefit->getCreatedAtDaysBefore();
 
             if ($createdAtDaysBefore) {
-                $checkTimestamp = $customerCreatedAtTimestamp + $createdAtDaysBefore * 24 * 60 * 60;
+                $checkTimestamp = $customerCheckTimestamp + $createdAtDaysBefore * 24 * 60 * 60;
 
                 if ($currentTimestamp > $checkTimestamp) {
                     continue;
@@ -128,8 +155,8 @@ class Data extends AbstractHelper
             return [
                 'customer_benefit_id' => $customerBenefit->getId(),
                 'target_product_id'   => $customerBenefit->getTargetProductId(),
-                'price'               => $customerBenefit->getPrice(),
-                'discount'            => $customerBenefit->getDiscount(),
+                'price'               => $isPaid ? 0 : $customerBenefit->getPrice(),
+                'discount'            => $isPaid ? null : $customerBenefit->getDiscount(),
                 'limit'               => $customerBenefit->getLimit(),
                 'priority'            => $customerBenefit->getPriority(),
                 'api_flag'            => $customerBenefit->getApiFlag()
@@ -142,7 +169,7 @@ class Data extends AbstractHelper
     /**
      * @throws \Exception
      */
-    public function cleanProductCache()
+    public function cleanProductCache(): void
     {
         $this->cacheHelper->cleanProductCache(
             'customer_benefit',
@@ -182,5 +209,68 @@ class Data extends AbstractHelper
         }
 
         return $customerBenefits;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function getCheckTimestamp(): ?int
+    {
+        $customerId = $this->customerSession->getCustomerId();
+
+        if (! $customerId) {
+            return null;
+        }
+
+        $customerId = $this->variables->intValue($customerId);
+
+        return $this->getCustomerIdCheckTimestamp($customerId);
+    }
+
+    public function getCustomerIdCheckTimestamp(int $customerId): int
+    {
+        $customer = $this->customerHelper->loadCustomer($customerId);
+
+        return $this->getCustomerCheckTimestamp($customer);
+    }
+
+    public function getCustomerCheckTimestamp(\Magento\Customer\Model\Customer $customer): int
+    {
+        $customerCheckTimestamp = $customer->getCreatedAtTimestamp();
+
+        $additionalAttributeIds =
+            $this->storeHelper->getExplodedConfigValues('infrangible_catalogproductcustomerbenefit/customer/check');
+
+        foreach ($additionalAttributeIds as $additionalAttributeId) {
+            foreach ([$customer->getStoreId(), 0] as $storeId) {
+                try {
+                    $attributeValue = $this->attributeHelper->getAttributeValue(
+                        $this->databaseHelper->getDefaultConnection(),
+                        \Magento\Customer\Model\Customer::ENTITY,
+                        $this->variables->stringValue($additionalAttributeId),
+                        $this->variables->intValue($customer->getId()),
+                        $this->variables->intValue($storeId)
+                    );
+
+                    if ($attributeValue) {
+                        $attributeValueDatetime = \DateTime::createFromFormat(
+                            'Y-m-d H:i:s',
+                            $attributeValue
+                        );
+
+                        if ($attributeValueDatetime) {
+                            $attributeValueTimestamp = $attributeValueDatetime->getTimestamp();
+
+                            if ($attributeValueTimestamp > $customerCheckTimestamp) {
+                                $customerCheckTimestamp = $attributeValueTimestamp;
+                            }
+                        }
+                    }
+                } catch (\Exception $exception) {
+                }
+            }
+        }
+
+        return $customerCheckTimestamp;
     }
 }

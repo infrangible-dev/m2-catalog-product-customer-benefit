@@ -48,7 +48,7 @@ class Option
         callable $proceed,
         $flag = false
     ) {
-        if ($subject->getType() === 'benefit_checkbox') {
+        if ($subject->getType() === 'benefit_checkbox' && $subject->getProductId() && $subject->getOptionId()) {
             return $this->getPrice($subject);
         }
 
@@ -62,7 +62,7 @@ class Option
         \Magento\Catalog\Model\Product\Option $subject,
         callable $proceed
     ) {
-        if ($subject->getType() === 'benefit_checkbox') {
+        if ($subject->getType() === 'benefit_checkbox' && $subject->getProductId() && $subject->getOptionId()) {
             return $this->getPrice($subject);
         }
 

@@ -17,6 +17,6 @@ class Delete extends \Infrangible\BackendWidget\Controller\Backend\Object\Delete
 
     protected function getObjectDeletedMessage(): string
     {
-        return __('The customer price has been deleted.')->render();
+        return __('The customer benefit has been deleted.')->render();
     }
 }

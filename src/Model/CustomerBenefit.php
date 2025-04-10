@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace Infrangible\CatalogProductCustomerBenefit\Model;
 
 use FeWeDev\Base\Variables;
-use Infrangible\Core\Helper\Customer;
+use Infrangible\CatalogProductCustomerBenefit\Helper\Data;
 use Infrangible\Core\Helper\Product;
 use Infrangible\Core\Helper\Stores;
-use Magento\Customer\Model\Session;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Model\Context;
@@ -51,12 +50,6 @@ class CustomerBenefit extends AbstractModel
 {
     protected $_eventPrefix = 'customer_benefit';
 
-    /** @var Session */
-    protected $customerSession;
-
-    /** @var Customer */
-    protected $customerHelper;
-
     /** @var Variables */
     protected $variables;
 
@@ -66,14 +59,16 @@ class CustomerBenefit extends AbstractModel
     /** @var Product */
     protected $productHelper;
 
+    /** @var Data */
+    protected $helper;
+
     public function __construct(
         Context $context,
         Registry $registry,
-        Session $customerSession,
-        Customer $customerHelper,
         Variables $variables,
         Stores $storeHelper,
         Product $productHelper,
+        Data $helper,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = []
@@ -86,11 +81,10 @@ class CustomerBenefit extends AbstractModel
             $data
         );
 
-        $this->customerSession = $customerSession;
-        $this->customerHelper = $customerHelper;
         $this->variables = $variables;
         $this->storeHelper = $storeHelper;
         $this->productHelper = $productHelper;
+        $this->helper = $helper;
     }
 
     protected function _construct(): void
@@ -109,19 +103,12 @@ class CustomerBenefit extends AbstractModel
             return null;
         }
 
-        $customerId = $this->customerSession->getCustomerId();
-
-        if (! $customerId) {
+        $checkTimestamp = $this->helper->getCheckTimestamp();
+        if (! $checkTimestamp) {
             return null;
         }
-
-        $customerId = $this->variables->intValue($customerId);
-
-        $customer = $this->customerHelper->loadCustomer($customerId);
-
-        $createdAtTimestamp = $customer->getCreatedAtTimestamp();
         $customerDate = new \DateTime();
-        $customerDate->setTimestamp($createdAtTimestamp);
+        $customerDate->setTimestamp($checkTimestamp);
         $customerDate->add(
             new \DateInterval(
                 sprintf(

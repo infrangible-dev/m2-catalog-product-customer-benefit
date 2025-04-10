@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+
+<!--
+ * @author      Andreas Knollmann
+ * @copyright   2014-2025 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="infrangible_catalogproductcustomerbenefit" sortOrder="1000" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+            <label>Catalog Product Customer Benefit</label>
+            <tab>infrangible</tab>
+            <resource>Infrangible_CatalogProductCustomerBenefit::infrangible_catalogproductcustomerbenefit</resource>
+            <group id="customer" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                <label>Customer</label>
+                <field id="check" translate="label" type="multiselect" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Check</label>
+                    <source_model>Infrangible\Core\Model\Config\Source\Attribute\Customer</source_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
