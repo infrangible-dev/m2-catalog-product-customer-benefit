@@ -242,6 +242,11 @@ class CustomerBenefit extends Base implements CalculationDataInterface
         );
     }
 
+    public function getProductTierPrices(Product $product): array
+    {
+        return [];
+    }
+
     /**
      * @throws NoSuchEntityException
      * @throws LocalizedException
@@ -358,8 +363,10 @@ class CustomerBenefit extends Base implements CalculationDataInterface
 
                 $optionValueIds = array_unique($optionValueIds);
 
-                $optionValueIds = array_map([$this->variables, 'intValue'],
-                    $optionValueIds);
+                $optionValueIds = array_map(
+                    [$this->variables, 'intValue'],
+                    $optionValueIds
+                );
 
                 if (! in_array(
                     $sourceProductOptionValueId,
